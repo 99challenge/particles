@@ -12,7 +12,7 @@ window.requestAnimFrame = (function() {
 var main = (function () {
     var canvas, ctx;
     var particles = [];
-    var radius = 40;
+    var radius = 100;
     var cx, cy;
 
     function Particle(o) {
@@ -37,6 +37,10 @@ var main = (function () {
         ctx.fill();
     };
 
+    var insideCircle = function (x0, y0, x1, y1, r) {
+        return Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)) < r;
+    };
+
     var draw = function () {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -50,6 +54,15 @@ var main = (function () {
         for (var i = 0, l = particles.length; i < l; i++) {
             var particle = particles[i];
 
+            if (insideCircle(cx, cy, particle.x, particle.y, radius)) {
+                if (particle.r < radius - Math.sqrt((particle.x-cx)*(particle.x-cx) + (particle.y-cy)*(particle.y-cy))) {
+                    particle.r++;
+                }
+            }
+            else if (particle.r > 5) {
+                // Decrease radius
+                particle.r--;
+            }
         }
 
     };
@@ -72,8 +85,6 @@ var main = (function () {
         // Place particles
         var xs = Math.round(canvas.width / 50);
         var ys = Math.round(canvas.height / 50);
-        console.log(xs);
-        console.log(ys);
 
         for (var y = 0; y < ys; y++) {
             for (var x = 0; x < xs; x++) {
@@ -81,7 +92,7 @@ var main = (function () {
                     'x': 20 + x * 50,
                     'y': 20 + y * 50,
                     'r': 5,
-                    'colour': '#fafafa'
+                    'colour': 'rgba(255, 255, 255, 0.5)'
                 }));
             }
         }
