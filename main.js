@@ -10,6 +10,7 @@ window.requestAnimFrame = (function() {
 })();
 
 var main = (function () {
+
     var canvas, ctx;
     var particles = [];
     var radius = 100;
@@ -24,12 +25,9 @@ var main = (function () {
         this.draw = function () {
             circle(this.x, this.y, this.r, this.colour);
         };
-
-        this.update = function () {
-
-        };
     }
 
+    // Create a circle
     var circle = function (x, y, r, colour) {
         ctx.beginPath();
         ctx.fillStyle = colour;
@@ -37,10 +35,12 @@ var main = (function () {
         ctx.fill();
     };
 
+    // Check if a point is inside a circumference
     var insideCircle = function (x0, y0, x1, y1, r) {
-        return Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)) < r;
+        return r - Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)); // < r
     };
 
+    // Draw circles
     var draw = function () {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -49,13 +49,15 @@ var main = (function () {
         }
     };
 
+    // Update logic
     var update = function () {
 
         for (var i = 0, l = particles.length; i < l; i++) {
             var particle = particles[i];
+            var diff = insideCircle(cx, cy, particle.x, particle.y, radius);
 
-            if (insideCircle(cx, cy, particle.x, particle.y, radius)) {
-                if (particle.r < radius - Math.sqrt((particle.x-cx)*(particle.x-cx) + (particle.y-cy)*(particle.y-cy))) {
+            if (diff > 0) {
+                if (particle.r < diff) {
                     particle.r++;
                 }
             }
@@ -67,6 +69,7 @@ var main = (function () {
 
     };
 
+    // Main loop
     var loop = function _loop () {
         window.requestAnimationFrame(_loop);
 
@@ -74,6 +77,7 @@ var main = (function () {
         draw();
     };
 
+    // Initialisation
     var init = function () {
 
         canvas = document.getElementById('world');
@@ -83,8 +87,8 @@ var main = (function () {
         canvas.height = window.innerHeight;
 
         // Place particles
-        var xs = Math.round(canvas.width / 50);
-        var ys = Math.round(canvas.height / 50);
+        var xs = Math.round(canvas.width / 50),
+            ys = Math.round(canvas.height / 50);
 
         for (var y = 0; y < ys; y++) {
             for (var x = 0; x < xs; x++) {
@@ -92,18 +96,20 @@ var main = (function () {
                     'x': 20 + x * 50,
                     'y': 20 + y * 50,
                     'r': 5,
-                    'colour': 'rgba(255, 255, 255, 0.5)'
+                    'colour': 'rgba(255, 255, 255, 0.7)'
                 }));
             }
         }
 
+        // Event listeners
         window.addEventListener('mousemove', function (e) {
             cx = e.clientX;
             cy = e.clientY;
         });
 
         window.addEventListener('touchmove', function (e) {
-
+            cx = e.clientX;
+            cy = e.clientY;
         });
 
         window.addEventListener('resize', function() {
